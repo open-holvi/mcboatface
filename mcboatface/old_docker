@@ -1,0 +1,19 @@
+FROM debian
+ADD . /code
+WORKDIR /code
+
+# Seutup supervisor
+RUN apt-get update && apt-get upgrade && apt-get install -y supervisor
+RUN mkdir -p /var/log/supervisor
+
+ADD ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Install and pushing PIP to latest version
+RUN apt-get install -y python-pip
+RUN pip install --ignore-installed pip
+
+
+ENV PYTHONPATH $PYTHONPATH:/code
+EXPOSE 8080
+
+RUN pip install -r requirements.txt

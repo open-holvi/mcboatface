@@ -3,20 +3,20 @@
 
 # How to run.
 
-```
+```bash
 docker build -t mcboatface .
 ```
 
 and then
 
-```
+```bash
 docker run mcboatface:latest
 ```
 
 # How to use:
 
 ## To get a face representation
-```
+```bash
 curl -F "image=@/path/to/image.jpg" host:port/api/v1/face/representation
 ```
 returns:
@@ -37,9 +37,10 @@ returns:
       ],
     }
 }
+```
 
 ## To get all the face representations
-```
+```bash
 curl -F "image=@/path/to/image.jpg" host:port/api/v1/faces/representation
 ```
 returns:
@@ -50,7 +51,7 @@ returns:
 ```
 
 ## To get similarity between two faces in the image
-```
+```bash
 curl -F "image=@/home/user1/Desktop/test.jpg" host:port/api/v1/id_selfie/score
 ```
 

@@ -4,7 +4,7 @@ import tempfile
 from service import health_checks
 from service.face_comparison import FaceRepresentationService
 from api.utils import allowed_file
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, request, make_response, abort
 
 from settings import UPLOAD_FOLDER
 
@@ -22,14 +22,14 @@ def health_status():
 def get_representation():
     """
     Return the face (main one) on the uploaded image.
-    :param: file
-    :return: dict
+    :param: file image
+    :return: {'face': {...} }
     """
     if request.method == 'POST':
         # check if the post request has the file part
-        if 'file' not in request.files:
+        if 'image' not in request.files:
             abort(422)
-        file = request.files['file']
+        file = request.files['image']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
@@ -54,15 +54,15 @@ def get_representation():
 def get_representations():
     """
     Return the face (main one) on the uploaded image.
-    :param: file file
-    :return: list of dict
+    :param: file image
+    :return: {'faces': [{...}, {...}] }
     """
     if request.method == 'POST':
         # check if the post request has the file part
-        if 'file' not in request.files:
+        if 'image' not in request.files:
             flash('No file part')
             return redirect(request.url)
-        file = request.files['file']
+        file = request.files['image']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
@@ -89,14 +89,14 @@ def get_representations():
 def score_selfie_photo():
     """
     Return the face (main one) on the uploaded image.
-    :param: file file
-    :return: list of dict
+    :param: file image
+    :return: {'score': x.xxx }
     """
     if request.method == 'POST':
         # check if the post request has the file part
-        if 'file' not in request.files:
+        if 'image' not in request.files:
             abort(422)
-        file = request.files['file']
+        file = request.files['image']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':

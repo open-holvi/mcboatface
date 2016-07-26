@@ -1,11 +1,7 @@
 version: '2'
 services:
-  db:
-    image: postgres
   mcboatface:
     build: ./mcboatface
     command: supervisord
     ports:
       - "8000:8000"
-    depends_on:
-      - db

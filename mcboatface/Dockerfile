@@ -24,6 +24,8 @@ RUN apt-get update -y && apt-get install -y \
 ADD . /code
 WORKDIR /code
 
+VOLUME ["/temp_storage"]
+
 # Seutup supervisor
 RUN mkdir -p /var/log/supervisor
 ADD ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

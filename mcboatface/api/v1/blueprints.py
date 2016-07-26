@@ -1,13 +1,15 @@
 """V1 for api."""
 
-from service import health_checks
-from service.face_comparison import FaceComparisonService
-from flask import Blueprint, jsonify, request
 import tempfile
-from settings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
+from service import health_checks
+from service.face_comparison import FaceRepresentationService
+from api.utils import allowed_file
+from flask import Blueprint, jsonify, request, make_response
+
+from settings import UPLOAD_FOLDER
 
 # Booting up service uppon api start.
-service = FaceComparisonService()
+service = FaceRepresentationService()
 
 app = Blueprint('api_v1', __name__)
 
@@ -16,13 +18,45 @@ def health_status():
     """Return system satus."""
     return jsonify(**health_checks.system_status())
 
+@app.route("/face/representation", methods=['POST'])
+def get_representation():
+    """
+    Return the face (main one) on the uploaded image.
+    :param: file
+    :return: dict
+    """
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            abort(422)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            abort(422)
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+        if file and allowed_file(file.filename):
+            image_file = tempfile.NamedTemporaryFile()
+            image_file.seek(0)
+            file.save(image_file.name)
+            image_file.seek(0)
+            result = service.get_image_representation(image_file.name)
+            if result is not None:
+                return jsonify(
+                    {'face': service.get_absolute_representation(result)})
+        else:
+            abort(401)
+
+    return make_response("Unable to find face", 404)
+
 
 @app.route("/faces/representation", methods=['POST'])
-def register_representation():
+def get_representations():
+    """
+    Return the face (main one) on the uploaded image.
+    :param: file file
+    :return: list of dict
+    """
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -32,14 +66,59 @@ def register_representation():
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+            abort(422)
+
         if file and allowed_file(file.filename):
             image_file = tempfile.NamedTemporaryFile()
             image_file.seek(0)
             file.save(image_file.name)
             image_file.seek(0)
-            result = service.get_image_representation(image_file.name)
+            result = service.get_all_representations(image_file.name)
             if result is not None:
-                return jsonify(**service.get_absolute_representation(result))
-    return "Nothing found"
+                return jsonify({
+                    'faces': list(
+                        (service.get_absolute_representation(r)
+                         for r in result))})
+        else:
+            abort(401)
+
+    return make_response("Unable to find faces", 404)
+
+
+@app.route("/id_selfie/score", methods=['POST'])
+def score_selfie_photo():
+    """
+    Return the face (main one) on the uploaded image.
+    :param: file file
+    :return: list of dict
+    """
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            abort(422)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            abort(422)
+
+        if file and allowed_file(file.filename):
+            image_file = tempfile.NamedTemporaryFile()
+            image_file.seek(0)
+            file.save(image_file.name)
+            image_file.seek(0)
+            result = service.get_all_representations(image_file.name)
+
+            if len(result) != 2:
+                return make_response(
+                    "%s (not two) faces where found in the image"
+                    % len(result), 422)
+
+            final_result = {
+                'score': service.compare_representations(result[0], result[1])
+            }
+            return jsonify(final_result)
+        else:
+            abort(401)
+
+    return make_response("Unable to find faces", 404)

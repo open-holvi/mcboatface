@@ -1,4 +1,6 @@
-## Boaty mcboatface
+# Boaty mcboatface
+
+McBoatface is an isolation of some features of [OpenFace](https://github.com/cmusatyalab/openface) to get descriptors for faces in images. It has also capabilites to find the similarity between two faces in a picture, aimed to validate selfie+id photos in KYC processes. The objective of McBoatFace is(or was) to find duplicate people (find if a person is in multiple pictures)
 
 
 # How to run.

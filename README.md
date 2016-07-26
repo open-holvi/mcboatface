@@ -2,15 +2,21 @@
 
 
 # How to run.
+```bash
+git clone git@github.com:smaisidoro/mcboatface.git
+cd mcboatface/mcboatface
+```
+and then build and run the amazingness
+(mapping container port 8000 to your machine port 8000)
 
 ```bash
-docker build -t mcboatface .
+docker build -t mcboatface:latest .
 ```
 
-and then
+
 
 ```bash
-docker run mcboatface:latest
+docker run -p 8000:8000 mcboatface
 ```
 
 # How to use:

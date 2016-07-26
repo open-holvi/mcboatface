@@ -40,3 +40,5 @@ EXPOSE 8000
 
 RUN cd /code/trained_models && \
     ./get-models.sh
+
+CMD ["python", "api/launch_api.py"]

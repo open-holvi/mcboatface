@@ -17,6 +17,7 @@ openfaceModelDir = os.path.join(modelDir, 'openface')
 
 class FaceComparisonService (object):
     def __init__(self, *args, **kwargs):
+
         self.dlibFacePredictor = os.path.join(
             dlibModelDir,
             kwargs.get(
@@ -31,7 +32,7 @@ class FaceComparisonService (object):
         self.align = openface.AlignDlib(self.dlibFacePredictor)
         self.net = openface.TorchNeuralNet(self.networkModel, self.imgDim)
 
-    def get_all_representations(imgPath):
+    def get_all_representations(self, imgPath):
         bgrImg = cv2.imread(imgPath)
         if bgrImg is None:
             raise Exception("Unable to load image: {}".format(imgPath))
@@ -44,14 +45,14 @@ class FaceComparisonService (object):
         representations = []
         for bb in bbs:
             alignedFace = self.align.align(
-                args.imgDim, rgbImg, bb,
+                self.imgDim, rgbImg, bb,
                 landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
             if alignedFace is None:
                 continue
             representations.append(self.net.forward(alignedFace))
         return rep
 
-    def get_image_representation(imgPath):
+    def get_image_representation(self, imgPath):
         bgrImg = cv2.imread(imgPath)
         if bgrImg is None:
             raise Exception("Unable to load image: {}".format(imgPath))
@@ -62,7 +63,7 @@ class FaceComparisonService (object):
             return None
 
         alignedFace = self.align.align(
-            args.imgDim, rgbImg, bb,
+            self.imgDim, rgbImg, bb,
             landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
         if alignedFace is None:
             return None
@@ -70,6 +71,14 @@ class FaceComparisonService (object):
         rep = self.net.forward(alignedFace)
         return rep
 
-    def compare_representations(repr1, repr2):
+    def compare_representations(self, repr1, repr2):
         d = repr1 - repr2
         return np.dot(d, d)
+
+
+    def get_absolute_representation(self, repr1):
+        return {
+            'representation': list(repr1),
+            'face_predictor': self.dlibFacePredictor,
+            'img_dim': self.imgDim
+        }

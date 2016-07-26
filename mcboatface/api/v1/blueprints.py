@@ -35,11 +35,11 @@ def register_representation():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-
-            image_file = tempfile.NamedTemporaryFile(
-                dir=UPLOAD_FOLDER)
+            image_file = tempfile.NamedTemporaryFile()
             image_file.seek(0)
             file.save(image_file.name)
             image_file.seek(0)
-            return service.get_image_representation(image_file.name)
-    return None
+            result = service.get_image_representation(image_file.name)
+            if result is not None:
+                return jsonify(**service.get_absolute_representation(result))
+    return "Nothing found"
